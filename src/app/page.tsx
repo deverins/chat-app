@@ -1,5 +1,5 @@
 // src/app/page.tsx
-"use client"; // This line is needed for client-side components
+"use client";
 
 import Chat from '@/components/Chat';
 import { ChatProvider } from '@/context/ChatContext';
