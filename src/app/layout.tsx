@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Chat App",
-  description: "",
+  title: "Real-Time Chat Ap",
+  description: "A real-time chat app using Next.js, TypeScript, Express, Socket.io, and Tailwind CSS",
 };
 
 export default function RootLayout({
