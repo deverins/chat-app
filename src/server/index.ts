@@ -1,31 +1,41 @@
-// src/server/index.ts
-import http from 'http';
+// 
+
+// server.ts
 import express from 'express';
-import { Server, Socket } from 'socket.io';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import next from 'next';
 
-// Create an Express application
-const app = express();
+const dev = process.env.NODE_ENV !== 'production';
+const app = next({ dev });
+const handle = app.getRequestHandler();
 
-// Create an HTTP server and attach the Express application
-const server = http.createServer(app);
+app.prepare().then(() => {
+  const server = express();
+  const httpServer = createServer(server);
+  const io = new Server(httpServer);
 
-// Create a Socket.IO server and attach it to the HTTP server
-const io = new Server(server);
+  io.on('connection', (socket) => {
+    console.log('New client connected');
 
-// Handle Socket.IO connections
-io.on('connection', (socket: Socket) => {
-  console.log('a user connected');
+    socket.emit("connection", "connected")
 
-  socket.on('disconnect', () => {
-    console.log('user disconnected');
+    socket.on('message', (message) => {
+      io.emit('message', message);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected');
+    });
   });
 
-  socket.on('chat message', (msg: string) => {
-    io.emit('chat message', msg);
+  server.all('*', (req, res) => {
+    return handle(req, res);
   });
-});
 
-// Start the server
-server.listen(3001, () => {
-  console.log('Server listening on port 3001');
+  const port = process.env.PORT || 3000;
+  httpServer.listen(port, (err?: any) => {
+    if (err) throw err;
+    console.log(`> Ready on http://localhost:${port}`);
+  });
 });

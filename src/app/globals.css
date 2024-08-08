@@ -2,3 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  * {
+    @apply box-border;
+  }
+
+  input {
+    @apply border text-black border-neutral-500 rounded-lg p-2
+  }
+}
+

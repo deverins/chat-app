@@ -1,6 +1,6 @@
-// src/context/ChatContext.tsx
 import socket from '@/utils/socket';
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+
 interface ChatContextProps {
   messages: string[];
   input: string;
@@ -13,7 +13,7 @@ const ChatContext = createContext<ChatContextProps | undefined>(undefined);
 export const useChat = () => {
   const context = useContext(ChatContext);
   if (!context) {
-    throw new Error('useChat must be used within a ChatProvider');
+    throw new Error('useChat must used within a ChatProvider');
   }
   return context;
 };

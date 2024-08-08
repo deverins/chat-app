@@ -1,46 +1,29 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { Server as ServerIO } from 'socket.io';
-import { Server as NetServer } from 'http';
+import http from 'http';
+import express from 'express';
+import { Server as SocketIOServer, Socket } from 'socket.io';
 
-// Type guard to check if the server has `io` property
-function isServerWithIo(server: any): server is NetServer & { io?: ServerIO } {
-  return server && typeof server === 'object' && 'io' in server;
-}
+const app = express();
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+});
 
-const ioHandler = (req: NextApiRequest, res: NextApiResponse) => {
-  const socket = res.socket as { server?: NetServer };
+io.on('connection', (socket: Socket) => {
+  console.log('a user connected');
+  
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
 
-  if (!socket.server) {
-    res.status(500).json({ error: 'Server not available' });
-    return;
-  }
+  socket.on('chat message', (msg: string) => {
+    io.emit('chat message', msg);
+  });
+});
 
-  const server = socket.server;
-
-  if (!isServerWithIo(server)) {
-    res.status(500).json({ error: 'Server not available or incorrect type' });
-    return;
-  }
-
-  if (!server.io) {
-    console.log('Initializing Socket.io');
-    const io = new ServerIO(server);
-    server.io = io;
-
-    io.on('connection', (socket) => {
-      console.log('a user connected');
-
-      socket.on('disconnect', () => {
-        console.log('user disconnected');
-      });
-
-      socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
-      });
-    });
-  }
-
-  res.status(200).end();
-};
-
-export default ioHandler;
+const PORT = process.env.PORT || 3001;
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});

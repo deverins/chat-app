@@ -1,4 +1,3 @@
-// src/components/chat.tsx
 import { useChat } from "@/context/ChatContext";
 
 
@@ -12,16 +11,18 @@ const Chat = () => {
           <div key={index}>{msg}</div>
         ))}
       </div>
-      <div className="flex mt-4">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="border flex-grow p-2"
-        />
+      <div className=" bg-black h-auto p-2">
+        <div className="flex mt-4">
+          <input
+            type="text" 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="border flex-grow p-2"
+          />
         <button onClick={sendMessage} className="ml-2 p-2 bg-blue-500 text-white">
           Send
         </button>
+        </div>
       </div>
     </div>
   );
