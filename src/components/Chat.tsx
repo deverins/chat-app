@@ -1,30 +1,40 @@
-import { useChat } from "@/context/ChatContext";
+"use client"
+import { useChat } from '@/context/ChatContext';
+import React from 'react';
 
-
-const Chat = () => {
-  const { messages, input, setInput, sendMessage } = useChat();
+const Chat: React.FC = () => {
+  const {
+    messages,
+    sendMessage,
+    setText,
+    inputRef,
+    showNameBox,
+    setName,
+    nameBoxHandler,
+  } = useChat();
 
   return (
-    <div className="p-4">
-      <div className="border p-4 h-64 overflow-y-scroll">
-        {messages.map((msg, index) => (
-          <div key={index}>{msg}</div>
+    <section className="h-[100dvh] w-full bg-black text-white relative">
+      <div className="h-[calc(100dvh-80px)] overflow-y-auto p-2">
+        {messages.map((m, index) => (
+          <div key={index} className="mb-2 p-2 border-b rounded-lg bg-neutral-700">
+            {m}
+          </div>
         ))}
       </div>
-      <div className=" bg-black h-auto p-2">
-        <div className="flex mt-4">
-          <input
-            type="text" 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="border flex-grow p-2"
-          />
-        <button onClick={sendMessage} className="ml-2 p-2 bg-blue-500 text-white">
+      <div className="h-20 px-3 gap-3 flex items-center">
+        <input ref={inputRef} type="text" onChange={setText} className="w-full" />
+        <button className="bg-purple-600 px-3 py-2 rounded-lg" onClick={sendMessage}>
           Send
         </button>
-        </div>
       </div>
-    </div>
+      <div className="absolute p-2 flex gap-2 top-0 right-0">
+        {showNameBox && <input type="text" onChange={setName} className="w-40" />}
+        <button onClick={nameBoxHandler} className="bg-purple-600 px-3 py-2 rounded-lg">
+          {showNameBox ? 'Set name' : 'Click to enter name'}
+        </button>
+      </div>
+    </section>
   );
 };
 
