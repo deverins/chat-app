@@ -41,8 +41,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [roomName, setRoomName] = useState('');
   const [showNameBox, setShowNameBox] = useState(false);
 
+  // Persistent socket instance
+  const socketRef = useRef<Socket | null>(null);
+
   useEffect(() => {
     const socket: Socket = io();
+    socketRef.current = socket;
 
     socket.on('connect', () => {
       console.log('Connected to server');
@@ -76,8 +80,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendMessage = () => {
     if (message && roomName && chatName && roomName.includes(chatName)) {
-      const socket: Socket = io();
-      socket.emit(roomName, message);
+      if (socketRef.current) {
+        socketRef.current.emit(roomName, message);
+      }
       if (inputRef?.current) {
         inputRef.current.value = '';
       }
