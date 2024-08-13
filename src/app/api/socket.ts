@@ -1,3 +1,4 @@
+// src/app/api/socket.ts
 import http from 'http';
 import express from 'express';
 import { Server as SocketIOServer, Socket } from 'socket.io';

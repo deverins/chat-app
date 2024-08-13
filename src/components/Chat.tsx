@@ -1,3 +1,4 @@
+// src/component/chat.tsx
 "use client"
 import { useChat } from '@/context/ChatContext';
 import React from 'react';
@@ -8,9 +9,9 @@ const Chat: React.FC = () => {
     sendMessage,
     setText,
     inputRef,
-    showNameBox,
-    setName,
-    nameBoxHandler,
+    // showNameBox,
+    // setName,
+    // nameBoxHandler,
   } = useChat();
 
   return (
@@ -28,12 +29,12 @@ const Chat: React.FC = () => {
           Send
         </button>
       </div>
-      <div className="absolute p-2 flex gap-2 top-0 right-0">
+      {/* <div className="absolute p-2 flex gap-2 top-0 right-0">
         {showNameBox && <input type="text" onChange={setName} className="w-40" />}
         <button onClick={nameBoxHandler} className="bg-purple-600 px-3 py-2 rounded-lg">
           {showNameBox ? 'Set name' : 'Click to enter name'}
         </button>
-      </div>
+      </div> */}
     </section>
   );
 };

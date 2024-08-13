@@ -1,12 +1,24 @@
-import Chat from '@/components/Chat';
-import { ChatProvider } from '@/context/ChatContext';
-import React from 'react';
+"use client"
+import Homepage from '@/components/Homepage';
+import LoadingSpinner from '@/components/LoadingSpinner';
+import React, { useEffect, useState } from 'react';
+import { HomepageProvider } from '../context/HomepageContext';
 
 function Home() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return <LoadingSpinner />;
+  }
   return (
-    <ChatProvider>
-      <Chat />
-    </ChatProvider>
+    <HomepageProvider>
+      {/* <Chat /> */}
+      <Homepage/>
+    </HomepageProvider>
   );
 }
 
