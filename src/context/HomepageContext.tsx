@@ -1,4 +1,3 @@
-// src/context/HomepageContext.tsx
 import React, { createContext, useContext, useState, useRef, useEffect, ChangeEvent } from 'react';
 import axios from 'axios';
 
@@ -7,7 +6,7 @@ interface HomepageContextProps {
   showNameBox: boolean;
   error: string;
   activeUsers: string[];
-  isExistingUser: boolean;  
+  isExistingUser: boolean;
   setUserName: (userName: string) => void;
   setShowNameBox: (showNameBox: boolean) => void;
   setError: (error: string) => void;
@@ -15,7 +14,7 @@ interface HomepageContextProps {
   setName: (input: string | ChangeEvent<HTMLInputElement>) => void;
   setIsExistingUser: (exists: boolean) => void;
   inputRef: React.RefObject<HTMLInputElement>;
-  updateUserName: (newUserName: string) => Promise<void>;  // Add this line
+  updateUserName: (newUserName: string) => Promise<void>;
 }
 
 const HomepageContext = createContext<HomepageContextProps | undefined>(undefined);
@@ -28,7 +27,6 @@ export const useHomepage = () => {
   return context;
 };
 
-// Export HomepageProvider to make it available in other modules
 export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [userName, setUserName] = useState<string>(localStorage.getItem('username') || '');
@@ -45,56 +43,38 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  // const nameBoxHandler = async () => {
-  //   try {
-  //     // Check if the user exists
-  //     const checkResponse = await axios.get('/api/user', {
-  //       params: { username: userName },
-  //     });
-  
-  //     if (checkResponse.status === 200) {
-  //       setError('Username already exists. Please choose another.');
-  //       return;
-  //     }
-  
-  //     // If the username doesn't exist, create a new one
-  //     const response = await axios.post('/api/user', { userName });
-  //     if (response.status === 201) {
-  //       setShowNameBox(false);
-  //       setUserName(response.data.user.username);
-  //       setIsExistingUser(true);
-  //       setError('');
-  //       localStorage.setItem('username', response.data.user.username);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error in nameBoxHandler:', error);
-  //     setError('Error processing username');
-  //   }
-  // };
   const nameBoxHandler = async () => {
-  try {
-    // Send POST request to check/create user
-    const response = await axios.post('/api/user', { username: userName });
-    
-    if (response.data.exists) {
-      setError('Username already exists. Please choose another.');
-    } else {
-      setShowNameBox(true);
-      setUserName(userName);
-      setIsExistingUser(true);
-      setError('');
-      localStorage.setItem('username', userName);
+    try {
+      // Check if the user exists
+      const checkResponse = await axios.get('/api/user', {
+        params: { username: userName },
+      });
+
+      if (checkResponse.status === 200) {
+        setError('Username already exists. Please choose another.');
+        return;
+      }
+
+      // If the username doesn't exist, create a new one
+      const response = await axios.post('/api/user', { userName });
+      if (response.status === 201) {
+        setShowNameBox(false);
+        setUserName(response.data.user.username);
+        setIsExistingUser(true);
+        setError('');
+        localStorage.setItem('username', response.data.user.username);
+      }
+    } catch (error) {
+      console.error('Error in nameBoxHandler:', error);
+      setError('Error processing username');
     }
-  } catch (error) {
-    console.error('Error in nameBoxHandler:', error);
-    setError('Error processing username');
-  }
-};
+  };
+
 
   const updateUserName = async (newUserName: string) => {
     try {
       const response = await axios.put('/api/user', { oldUserName: userName, newUserName });
-      
+
       if (response.status === 200) {
         setUserName(newUserName);
         setError('');
@@ -122,7 +102,7 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setName,
         setIsExistingUser,
         inputRef,
-        updateUserName,  // Make sure to include this in the context value
+        updateUserName,
       }}
     >
       {children}
@@ -177,7 +157,7 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 //   const [showNameBox, setShowNameBox] = useState(!userName);
 //   const [error, setError] = useState<string>('');
 //   const [activeUsers, setActiveUsers] = useState<string[]>([]);
-//   const [isExistingUser, setIsExistingUser] = useState(false); 
+//   const [isExistingUser, setIsExistingUser] = useState(false);
 
 //   useEffect(() => {
 //     if (error) {

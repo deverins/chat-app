@@ -1,4 +1,3 @@
-// src/component/Homepage.tsx
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useHomepage } from '@/context/HomepageContext';

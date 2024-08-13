@@ -28,10 +28,8 @@ app.prepare().then(() => {
     });
   });
 
-  // Middleware to parse JSON requests - Applied once
   server.use(express.json());
 
-  // Add the /api/user route
   server.post('/api/user', async (req, res) => {
     const { username } = req.body;
     try {
@@ -43,7 +41,6 @@ app.prepare().then(() => {
     }
   });
 
-  // Handle all other routes with Next.js
   server.all('*', (req, res) => {
     return handle(req, res);
   });
