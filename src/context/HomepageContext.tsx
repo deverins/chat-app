@@ -45,28 +45,27 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const nameBoxHandler = async () => {
     try {
-      // Check if the user exists
-      const checkResponse = await axios.get('/api/user', {
-        params: { username: userName },
-      });
 
-      if (checkResponse.status === 200) {
-        setError('Username already exists. Please choose another.');
-        return;
-      }
-
-      // If the username doesn't exist, create a new one
-      const response = await axios.post('/api/user', { userName });
+  
+      const response = await axios.post('/api/user', { username: userName });
+  
       if (response.status === 201) {
-        setShowNameBox(false);
         setUserName(response.data.user.username);
         setIsExistingUser(true);
         setError('');
         localStorage.setItem('username', response.data.user.username);
+        setShowNameBox(false);
       }
     } catch (error) {
-      console.error('Error in nameBoxHandler:', error);
       setError('Error processing username');
+    }
+    const checkResponse = await axios.get('/api/user', {
+      params: { username: userName },
+    });
+    console.log("checkResponse", checkResponse)
+    if (checkResponse.status === 200) {
+      setError('Username already exists. Please choose another.');
+      return;
     }
   };
 
@@ -74,17 +73,33 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const updateUserName = async (newUserName: string) => {
     try {
       const response = await axios.put('/api/user', { oldUserName: userName, newUserName });
-
+  
       if (response.status === 200) {
         setUserName(newUserName);
         setError('');
         localStorage.setItem('username', newUserName);
       }
     } catch (error) {
-      console.error('Error changing username:', error);
       setError('Error changing username');
     }
   };
+  useEffect(() => {
+    const fetchActiveUsers = async () => {
+      try {
+        const response = await axios.get('/api/active-user');
+        console.log('active',response)
+        if (response.status === 200) {
+          setActiveUsers(response.data.activeUser.map((user: any) => user.username));
+        }
+      } catch (error: any) {
+        console.error('Error fetching active users:', error);
+        setError('Failed to fetch active users. Please try again later.');
+      }
+    };
+  
+    fetchActiveUsers();
+  }, []);
+  
 
 
   return (

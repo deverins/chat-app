@@ -1,10 +1,7 @@
-// src/server/index.ts
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import next from 'next';
-import User from '../../models/user.model';
-
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
@@ -29,17 +26,6 @@ app.prepare().then(() => {
   });
 
   server.use(express.json());
-
-  server.post('/api/user', async (req, res) => {
-    const { username } = req.body;
-    try {
-      const user = await User.findOne({ username });
-      res.json({ exists: !!user });
-    } catch (error) {
-      console.error('Error checking username:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
 
   server.all('*', (req, res) => {
     return handle(req, res);

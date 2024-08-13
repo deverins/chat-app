@@ -1,4 +1,3 @@
-// sever.ts
 import express from 'express';
 import { createServer } from 'http';
 import next from 'next';
@@ -25,17 +24,6 @@ nextApp.prepare().then(() => {
   server.use(express.json());
 
   connectDB();
-
-  server.post('/api/username', async (req, res) => {
-    const { username } = req.body;
-    try {
-      const user = await User.findOne({ username });
-      res.json({ exists: !!user });
-    } catch (error) {
-      console.error('Error checking username:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  });
 
   io.on('connection', (socket: Socket) => {
     console.log('New client connected');
@@ -105,6 +93,7 @@ nextApp.prepare().then(() => {
     console.log(`> Ready on http://localhost:${port}`);
   });
 });
+
 
 
 

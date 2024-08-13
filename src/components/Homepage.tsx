@@ -45,30 +45,30 @@ const Homepage = () => {
               {isExistingUser ? "Change your username" : "You're required to set your username"}
             </label>
             <div className='flex gap-2'>
-  <input
-    type="text"
-    placeholder="Set your username"
-    value={userName}
-    onChange={setName}
-    className='border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500 text-black'
-  />
-  <button 
-    onClick={async () => {
-      if (isExistingUser) {
-        await updateUserName(userName);
-      } else {
-        await nameBoxHandler();
-      }
-      
-      if (!error) {
-        setName('');
-      }
-    }} 
-    className='bg-purple-600 px-4 py-2 rounded-lg text-white hover:bg-purple-700'
-  >
-    {isExistingUser ? 'Change username' : 'Set username'}
-  </button>
-</div>
+              <input
+                type="text"
+                placeholder="Set your username"
+                value={userName}
+                onChange={setName}
+                className='border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500 text-black'
+              />
+              <button 
+                onClick={async () => {
+                  if (isExistingUser) {
+                    await updateUserName(userName);
+                  } else {
+                    await nameBoxHandler();
+                  }
+                  
+                  if (!error) {
+                    setName('');
+                  }
+                }} 
+                className='bg-purple-600 px-4 py-2 rounded-lg text-white hover:bg-purple-700'
+              >
+                {isExistingUser ? 'Change username' : 'Set username'}
+              </button>
+            </div>
 
             {error && <p className='text-red-500 mt-2'>{error}</p>}
           </div>
