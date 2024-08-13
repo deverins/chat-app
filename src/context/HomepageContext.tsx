@@ -45,37 +45,55 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  // const nameBoxHandler = async () => {
+  //   try {
+  //     // Check if the user exists
+  //     const checkResponse = await axios.get('/api/user', {
+  //       params: { username: userName },
+  //     });
+  
+  //     if (checkResponse.status === 200) {
+  //       setError('Username already exists. Please choose another.');
+  //       return;
+  //     }
+  
+  //     // If the username doesn't exist, create a new one
+  //     const response = await axios.post('/api/user', { userName });
+  //     if (response.status === 201) {
+  //       setShowNameBox(false);
+  //       setUserName(response.data.user.username);
+  //       setIsExistingUser(true);
+  //       setError('');
+  //       localStorage.setItem('username', response.data.user.username);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error in nameBoxHandler:', error);
+  //     setError('Error processing username');
+  //   }
+  // };
   const nameBoxHandler = async () => {
-    try {
-      // Check if the user exists
-      const checkResponse = await axios.get('/api/user', {
-        params: { username: userName },
-      });
-  
-      if (checkResponse.status === 200) {
-        setError('Username already exists. Please choose another.');
-        return;
-      }
-  
-      // If the username doesn't exist, create a new one
-      const response = await axios.post('/api/user', { userName });
-      if (response.status === 201) {
-        setShowNameBox(false);
-        setUserName(response.data.user.username);
-        setIsExistingUser(true);
-        setError('');
-        localStorage.setItem('username', response.data.user.username);
-      }
-    } catch (error) {
-      console.error('Error in nameBoxHandler:', error);
-      setError('Error processing username');
+  try {
+    // Send POST request to check/create user
+    const response = await axios.post('/api/user', { username: userName });
+    
+    if (response.data.exists) {
+      setError('Username already exists. Please choose another.');
+    } else {
+      setShowNameBox(true);
+      setUserName(userName);
+      setIsExistingUser(true);
+      setError('');
+      localStorage.setItem('username', userName);
     }
-  };
-  
+  } catch (error) {
+    console.error('Error in nameBoxHandler:', error);
+    setError('Error processing username');
+  }
+};
+
   const updateUserName = async (newUserName: string) => {
     try {
-      const oldUserName = userName;
-      const response = await axios.put('/api/user', { oldUserName, newUserName });
+      const response = await axios.put('/api/user', { oldUserName: userName, newUserName });
       
       if (response.status === 200) {
         setUserName(newUserName);
@@ -87,6 +105,7 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setError('Error changing username');
     }
   };
+
 
   return (
     <HomepageContext.Provider

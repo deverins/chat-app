@@ -26,7 +26,7 @@ nextApp.prepare().then(() => {
 
   connectDB();
 
-  server.post('/api/user', async (req, res) => {
+  server.post('/api/username', async (req, res) => {
     const { username } = req.body;
     try {
       const user = await User.findOne({ username });

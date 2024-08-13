@@ -1,4 +1,3 @@
-// src/app/api/user/route.ts
 import { NextResponse } from 'next/server';
 import User from '../../../../models/user.model';
 import connectDB from '@/lib/mongodbConnection';
@@ -39,6 +38,7 @@ export async function POST(req: Request) {
     }
   }
 }
+
 // Handle GET requests for checking if a user exists
 export async function GET(req: Request) {
   try {
@@ -71,7 +71,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
   }
 }
-
 
 // Handle PUT requests for updating a user
 export async function PUT(req: Request) {
