@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import User from '../../../../models/user.model';
 import connectDB from '@/lib/mongodbConnection';
 
-// Handle POST requests for creating a user
 export async function POST(req: Request) {
   try {
     console.log('Connecting to database...');
@@ -39,7 +38,6 @@ export async function POST(req: Request) {
   }
 }
 
-// Handle GET requests for checking if a user exists
 export async function GET(req: Request) {
   try {
     console.log('Connecting to database...');
@@ -72,7 +70,6 @@ export async function GET(req: Request) {
   }
 }
 
-// Handle PUT requests for updating a user
 export async function PUT(req: Request) {
   try {
     console.log('Connecting to database...');
