@@ -1,13 +1,14 @@
-import connectDB from "@/lib/mongodbConnection";
-import User from "../../../../models/user.model";
+
 import { NextResponse } from "next/server";
+import Models from "@models/user.model"
 
 
 export async function GET() {
   try {
-    await connectDB();
+    const {User} = Models;
 
-    const activeUsers = await User.find({ active: true }).select('username').lean();
+    // const activeUsers = await User.find({ active: true }).select('username').lean();
+    const activeUsers = await User.find();
 
     return NextResponse.json({ activeUsers }, { status: 200 });
   } catch (error) {

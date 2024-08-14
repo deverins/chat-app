@@ -1,7 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import next from 'next';
-import User from './models/user.model'; 
+import Models from './models/user.model'; 
 import { Server, Socket } from 'socket.io';
 import 'dotenv/config';
 import connectDB from './src/lib/mongodbConnection';
@@ -15,15 +15,15 @@ declare module 'socket.io' {
 const dev = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
-
-nextApp.prepare().then(() => {
+const {User} = Models;
+nextApp.prepare().then(async() => {
   const server = express();
   const httpServer = createServer(server);
   const io = new Server(httpServer);
 
   server.use(express.json());
 
-  connectDB();
+  await connectDB();
 
   io.on('connection', (socket: Socket) => {
     console.log('New client connected');

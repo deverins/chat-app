@@ -13,12 +13,18 @@ const Homepage = () => {
     error,
     activeUsers,
     isExistingUser,
+    fetching,
     updateUserName,
   } = useHomepage();
 
   useEffect(() => {
     setShowNameBox(true);
   }, [setShowNameBox]);
+
+  useEffect(()=>{
+    console.log({activeUsers});
+    
+  }, [activeUsers])
 
   const handleChatAllUsers = () => {
     if (!userName) {
@@ -85,21 +91,28 @@ const Homepage = () => {
             </button>
           </div>
           <div className='mt-4'>
-            {activeUsers.length > 0 ? (
-              activeUsers.map((username: string) => (
-                <div key={username} className='flex justify-between items-center p-2 border-b border-gray-300'>
-                  <span>{username}</span>
-                  <button 
-                    onClick={() => handleDirectMessage(username)}
-                    className='bg-purple-600 px-3 py-1 rounded-lg text-white hover:bg-purple-700'
-                  >
-                    Chat
-                  </button>
-                </div>
-              ))
-            ) : (
-              <p className='text-center font-extrabold text-[28px] p-10'>No active users found.</p>
-            )}
+            {fetching?
+              (<div className="loader mx-auto ease-linear rounded-full border-4 border-t-4 h-12 w-12" />):
+              <div>
+                {activeUsers.length? (
+                     activeUsers.map((username: string) => (
+                       <div key={username} className='flex justify-between items-center p-2 border-b border-gray-300'>
+                         <span>{username}</span>
+                         <button 
+                           onClick={() => handleDirectMessage(username)}
+                           className='bg-purple-600 px-3 py-1 rounded-lg text-white hover:bg-purple-700'
+                         >
+                           Chat 
+                         </button>
+                       </div>
+                     ))
+                   ) : (
+                     <p className='text-center font-extrabold text-[28px] p-10'>No active users found.</p>
+                   )}
+              </div>
+            
+            }
+
           </div>
         </section>
       </div> 
