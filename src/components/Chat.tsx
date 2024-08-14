@@ -1,4 +1,3 @@
-// src/component/chat.tsx
 "use client"
 import { useChat } from '@/context/ChatContext';
 import React from 'react';
