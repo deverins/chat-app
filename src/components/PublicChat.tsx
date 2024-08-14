@@ -1,10 +1,11 @@
 "use client"
 import React, { useRef } from 'react';
-import { usePMSocket } from '@/hooks/socketClient';
+
+import { useRoomSocket } from '@/hooks/socketClient';
 
 const Chat: React.FC = () => {
 
-  const {messages, sendMessage, socket} = usePMSocket()
+  const {messages, sendMessage, socket} = useRoomSocket()
   const inputRef = useRef<HTMLInputElement | null>(null);
 
 

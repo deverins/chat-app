@@ -19,7 +19,7 @@ const userSchema: Schema = new Schema({
   status: { type: String, enum: ['active', 'inactive'], default: 'inactive' },
 });
 
-const User = mongoose.models.User || mongoose.model<IUser>('User', userSchema);
+const User = mongoose.models.User ||  mongoose.model<IUser>('User', userSchema);
 
 const messageSchema: Schema = new Schema({
   sender:  { type: Schema.Types.ObjectId, ref: "User", required:true },
@@ -29,8 +29,7 @@ const messageSchema: Schema = new Schema({
   message: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
-
-const Message = mongoose.models.Message || mongoose.model<IMessage>('Message', messageSchema);
+const Message = mongoose.models.Message ||  mongoose.model<IMessage>('Message', messageSchema);
 
 
 export default { User, Message, mongoose};

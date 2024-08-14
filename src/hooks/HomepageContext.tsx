@@ -9,6 +9,7 @@ interface HomepageContextProps {
   activeUsers: string[];
   isExistingUser: boolean;
   setUserName: (userName: string) => void;
+  setActiveUsers: (users: string[]) =>void;
   setShowNameBox: (showNameBox: boolean) => void;
   setError: (error: string) => void;
   nameBoxHandler: () => void;
@@ -45,29 +46,33 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
-  const nameBoxHandler = async () => {
+  async function nameBoxHandler() {
     try {
-      const response = await axios.post('/api/user', { username: userName });
-
-      if (response.status === 201) {
-        setUserName(response.data.user.username);
+        const response = await axios.post('/api/user', { username: userName });
+        if (response.status === 201) {
+            setUserName(response.data.user.username);
         setIsExistingUser(true);
         setError('');
         localStorage.setItem('username', response.data.user.username);
-        setShowNameBox(false);
-      }
+        setShowNameBox(false);  
+            setError('');
+        }
     } catch (error) {
-      setError('Error processing username');
+        setError('Error processing username');
     }
-    const checkResponse = await axios.get('/api/user', {
-      params: { username: userName },
-    });
-    console.log("checkResponse", checkResponse)
-    if (checkResponse.status === 200) {
-      setError('Username already exists. Please choose another.');
-      return;
+
+    try {
+        const checkResponse = await axios.get('/api/user', {
+            params: { username: userName },
+        });
+        if (checkResponse.status === 200) {
+            setError('Username already exists. Please choose another.');
+        }
+    } catch (error) {
+        console.error('Error checking existing username:', error);
     }
-  };
+}
+
 
 
   const updateUserName = async (newUserName: string) => {
@@ -111,6 +116,7 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         showNameBox,
         error,
         activeUsers,
+        setActiveUsers,
         isExistingUser,
         setUserName,
         setShowNameBox,

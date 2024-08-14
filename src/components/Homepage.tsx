@@ -12,6 +12,7 @@ const Homepage = () => {
     setShowNameBox,
     error,
     activeUsers,
+    setActiveUsers,
     isExistingUser,
     fetching,
     updateUserName,
@@ -25,7 +26,7 @@ const Homepage = () => {
     if (!userName) {
       setShowNameBox(true);
     } else {
-      navigate.push('/chat-all');
+      navigate.push('/chat/PUBLIC_ROOM');
     }
   };
 

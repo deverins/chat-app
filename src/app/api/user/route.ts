@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server';
-import User from '../../../../models/user.model';
-import connectDB from '@/lib/mongodbConnection';
+import Models from "@models/user.model"
 
 export async function POST(req: Request) {
   try {
-    console.log('Connecting to database...');
-    await connectDB();
-    console.log('Database connected.');
+    const {User} = Models;
 
     const { userName } = await req.json();
     console.log('Received userName:', userName);
@@ -29,20 +26,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'User created successfully', user: newUser }, { status: 201 });
   } catch (error) {
     if (error instanceof Error) {
-      console.error('POST /api/user error:', error.message);
-      return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
-    } else {
-      console.error('POST /api/user unexpected error:', error);
-      return NextResponse.json({ error: 'Unexpected Error' }, { status: 500 });
+      console.error('POST /api/user error:', error);
+      return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
   }
 }
 
 export async function GET(req: Request) {
   try {
-    console.log('Connecting to database...');
-    await connectDB();
-    console.log('Database connected.');
+    const {User} = Models;
 
     const url = new URL(req.url);
     const username = url.searchParams.get('username');
@@ -54,7 +46,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Username is required' }, { status: 400 });
     }
 
-    const userExists = await User.findOne({ username });
+    const userExists = await User.find({ username });
 
     if (userExists) {
       console.log('User exists.');
@@ -64,18 +56,14 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: 'User does not exist' }, { status: 404 });
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Internal Server Error';
-    console.error('GET /api/user error:', errorMessage);
-    return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
+    console.error('GET /api/user error:', error);
+    return NextResponse.json({ error: 'Failed to fetch user information', details: error }, { status: 500 });
   }
 }
 
 export async function PUT(req: Request) {
   try {
-    console.log('Connecting to database...');
-    await connectDB();
-    console.log('Database connected.');
-
+    const { User } = Models;
     const { oldUserName, newUserName } = await req.json();
     console.log('Received oldUserName:', oldUserName, 'newUserName:', newUserName);
 
@@ -84,20 +72,26 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'Both old and new user names are required' }, { status: 400 });
     }
 
-    const user = await User.findOne({ username: oldUserName });
-    if (!user) {
+    const users = await User.find({ username: oldUserName });
+    if (users.length === 0) {
       console.log('User not found.');
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    user.username = newUserName;
-    await user.save();
-    console.log('User updated successfully.');
+    const updatedUsers = await Promise.all(
+      users.map(async (user) => {
+        user.username = newUserName;
+        await user.save();
+        return user;
+      })
+    );
 
-    return NextResponse.json({ message: 'User updated successfully', user }, { status: 200 });
+    console.log('Users updated successfully.');
+
+    return NextResponse.json({ message: 'Users updated successfully', users: updatedUsers }, { status: 200 });
   } catch (error) {
-    const errorMessage = (error instanceof Error) ? error.message : 'Internal Server Error';
-    console.error('PUT /api/user error:', errorMessage);
-    return NextResponse.json({ error: 'Internal Server Error', details: errorMessage }, { status: 500 });
-  }
+    console.error('PUT /api/user error:', error);
+    return NextResponse.json({
+      error: 'An unexpected error occurred while updating your username. Please try again later.'
+    }, { status: 500 });  }
 }

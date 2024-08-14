@@ -1,92 +1,94 @@
-import express from 'express';
-import { createServer } from 'http';
-import next from 'next';
-import Models from './models/user.model'; 
-import { Server, Socket } from 'socket.io';
-import 'dotenv/config';
-import connectDB from './src/lib/mongodbConnection';
+import express from "express";
+import { createServer } from "http";
+import next from "next";
+import Models from "./models/user.model";
+import { Server, Socket } from "socket.io";
+import "dotenv/config";
+import connectDB from "./src/lib/mongodbConnection";
 
-declare module 'socket.io' {
+declare module "socket.io" {
   interface Socket {
     username?: string;
   }
 }
 
-const dev = process.env.NODE_ENV !== 'production';
+type MessagePayload = {
+  message: string;
+  from: string;
+};
+
+type IMessage = {
+  senderName: string,
+  receiver?: string,
+  type: "public" | "private",
+  message: string
+}
+
+const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
-const {User} = Models;
-nextApp.prepare().then(async() => {
+const { User, Message } = Models;
+nextApp.prepare().then(async () => {
   const server = express();
   const httpServer = createServer(server);
   const io = new Server(httpServer);
 
   server.use(express.json());
 
+  let PUBLIC_ROOM = "PUBLIC_ROOM";
+
   await connectDB();
 
-  io.on('connection', (socket: Socket) => {
-    console.log('New client connected');
+  const users = new Map();
 
-    socket.on('userName', async (name: string) => {
-      console.log({ name });
+  io.on("connection", (socket: Socket) => {
+    console.log("New client connected");
 
-      let user = await User.findOne({ username: name });
+    socket.on(PUBLIC_ROOM, async ({ message, from }: MessagePayload) => {
 
-      if (!user) {
-        user = new User({ username: name, status: 'active' });
-      } else {
-        user.status = 'active';
-      }
-      await user.save();
+      await saveMessage({message, senderName:from, type:'public'})
+      socket.broadcast.emit(PUBLIC_ROOM, { message, from, type:'message' });
+    });
 
-      socket.username = name;
-      socket.emit('userInfo', user);
+    socket.on("subscribe", (username: string) => {
+      users.set(username, socket.id);
+      socket.username = username; 
+      setStatus(username, "active");
+      socket.broadcast.emit(PUBLIC_ROOM, { message:username, type:'new' });
+    });
 
-      const users = [...io.sockets.sockets.values()]
-        .map(s => s.username)
-        .filter(Boolean) as string[];
-
-      if (!users.includes(name) && users.length < 2) users.push(name);
-
-      if (users.length === 2) {
-        const roomName = users.sort().join('-');
-        io.emit('roomName', roomName);
-
-        socket.on(roomName, async (message: { to: string; text: string }) => {
-          try {
-            const recipient = await User.findOne({ username: message.to });
-            if (recipient && recipient.status === 'active') {
-              io.to(roomName).emit(roomName, message);
-            } else {
-              if (recipient) {
-                recipient.messages.push({
-                  from: name,
-                  message: message.text,
-                  timestamp: new Date(),
-                });
-                await recipient.save();
-              }
-            }
-          } catch (error) {
-            console.error('Error sending message:', error);
-          }
+    // Listen for private messages
+    socket.on("privateMessage", async({ to, message }) => {
+      const recipientSocketId = users.get(to);
+      if (recipientSocketId) {
+        const senderName = socket.username as string
+        io.to(recipientSocketId).emit("privateMessage", {
+          senderName,
+          message,
+          time: new Date(),
         });
+        // save message
+        await saveMessage({message, senderName, receiver:to, type:'private'})
       }
     });
 
-    socket.on('disconnect', async () => {
-      console.log('Client disconnected');
-
-      const user = await User.findOne({ username: socket.username });
-      if (user) {
-        user.status = 'inactive';
-        await user.save();
+    // Handle disconnection
+    socket.on("disconnect", async() => {
+      console.log("User disconnected");
+      const username = socket.username;
+      if (username) {
+        users.delete(username); 
+        delete socket.username;
+        await setStatus(username, 'inactive');
       }
+    });
+
+    socket.on("disconnect", async () => {
+      console.log("Client disconnected");
     });
   });
 
-  server.all('*', (req, res) => handle(req, res));
+  server.all("*", (req, res) => handle(req, res));
 
   const port = process.env.PORT || 3000;
   httpServer.listen(port, () => {
@@ -94,108 +96,77 @@ nextApp.prepare().then(async() => {
   });
 });
 
+async function setStatus(username: string, status: "active" | "inactive") {
+  const user = await User.findOne({ username });
+  if (!user) return;
+  user.status = status;
+  await user.save();
+}
+
+async function saveMessage({
+  senderName,
+  receiver,
+  type,
+  message
+}: IMessage): Promise<boolean> {
+  try {
+    const _sender = await User.findOne({username: senderName});
+    if(!_sender) return false;
+    const sender = _sender._id;
+    await Message.create({sender,receiver,type,message})
+    return true;
+  } catch (error) {
+    console.log(error);    
+    return false;
+  }
+  
+}
 
 
+/**
+ * 
+ * // Listen for joining a room
+    socket.on('joinRoom', (room) => {
+        socket.join(room);
 
+        // Add user to the room's list
+        if (!rooms.has(room)) {
+            rooms.set(room, new Set());
+        }
+        rooms.get(room).add(socket.username);
 
+        // Broadcast updated online users list to the room
+        io.to(room).emit('onlineUsers', Array.from(rooms.get(room)));
 
-// const express = require("express");
-// const { Server } = require("socket.io");
-// const { createServer } = require("http");
-// const next = require("next");
-// const mongoose = require("mongoose");
-// const UserModel = require("./models/user.model")(mongoose);
+        console.log(`${socket.username} joined room ${room}`);
+    });
 
+    // Listen for public messages in a room
+    socket.on('publicMessage', ({ room, message }) => {
+        io.to(room).emit('publicMessage', {
+            from: socket.username,
+            message,
+        });
+    });
 
-// const dev = process.env.NODE_ENV !== "production";
-// const app = next({ dev });
-// const handle = app.getRequestHandler();
+    // Listen for leaving a room
+    socket.on('leaveRoom', (room) => {
+        socket.leave(room);
 
-// const connectDB = async () => {
-//   try {
-//     const mongoUri = process.env.MONGODB_URI || "your-mongodb-connection-string";
+        // Remove user from the room's list
+        if (rooms.has(room)) {
+            rooms.get(room).delete(socket.username);
 
-//     await mongoose.connect(mongoUri);
+            // If the room is empty, delete it
+            if (rooms.get(room).size === 0) {
+                rooms.delete(room);
+            } else {
+                // Otherwise, broadcast the updated online users list
+                io.to(room).emit('onlineUsers', Array.from(rooms.get(room)));
+            }
+        }
 
-//     console.log("MongoDB connected");
-//   } catch (err) {
-//     console.error("MongoDB connection error:", err);
-//     process.exit(1);
-//   }
-// };
+        console.log(`${socket.username} left room ${room}`);
+    });
 
-// app.prepare().then(() => {
-//   const server = express();
-//   const httpServer = createServer(server);
-//   const io = new Server(httpServer);
-
-//   const users: string[] = [];
-
-//   connectDB();
-
-//   io.on("connection", async (socket: any) => {
-//     console.log("New client connected");
-
-//     socket.emit("connection", "connected");
-
-//     socket.on("userName", async (name: string) => {
-//       console.log({ name });
-
-//       let user = await UserModel.findOne({ username: name });
-
-//       if (!user) {
-//         user = new UserModel({ username: name, status: "active" });
-//       } else {
-//         user.status = "active";
-//       }
-//       await user.save();
-
-//       if (!users.includes(name) && users.length < 2) users.push(name);
-
-//       if (users.length == 2) {
-//         console.log({ users });
-
-//         const roomName = users.sort((a, b) => (a > b ? -1 : 1)).join("-");
-//         io.emit("roomName", roomName);
-
-//         socket.on(roomName, async (message: any) => {
-//           console.log({ message }, "From room", roomName);
-
-//           const recipient = await UserModel.findOne({ username: message.to });
-//           if (recipient && recipient.status === "active") {
-//             io.emit(roomName, message);
-//           } else {
-//             if (recipient) {
-//               recipient.messages.push({
-//                 from: name,
-//                 message: message.text,
-//                 timestamp: new Date(),
-//               });
-//               await recipient.save();
-//             }
-//           }
-//         });
-//       }
-//     });
-
-//     socket.on("disconnect", async () => {
-//       console.log("Client disconnected");
-
-//       const user = await UserModel.findOne({ username: socket.username });
-//       if (user) {
-//         user.status = "inactive";
-//         await user.save();
-//       }
-//     });
-//   });
-
-//   server.all("*", (req: any, res: any) => {
-//     return handle(req, res);
-//   });
-
-//   const port = process.env.PORT || 3000;
-//   httpServer.listen(port, (err?: any) => {
-//     if (err) throw err;
-//     console.log(`> Ready on http://localhost:${port}`);
-//   });
-// });
+ */
