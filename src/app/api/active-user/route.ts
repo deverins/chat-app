@@ -7,8 +7,7 @@ export async function GET() {
   try {
     const {User} = Models;
 
-    // const activeUsers = await User.find({ active: true }).select('username').lean();
-    const activeUsers = await User.find();
+    const activeUsers = await User.find({ status: 'active' }).select('username').lean();
 
     return NextResponse.json({ activeUsers }, { status: 200 });
   } catch (error) {

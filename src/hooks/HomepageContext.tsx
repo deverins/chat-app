@@ -89,10 +89,7 @@ export const HomepageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         setFetching(true)
         const response = await axios.get('/api/active-user');
-        console.log(response);
-
         if (response.status !== 200) return;
-        console.log('active', response?.data?.activeUsers)
         setActiveUsers(response.data.activeUsers.map((user: any) => user.username as string));
       } catch (error: any) {
         console.error('Error fetching active users:', error);

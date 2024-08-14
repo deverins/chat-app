@@ -21,16 +21,11 @@ const Homepage = () => {
     setShowNameBox(true);
   }, [setShowNameBox]);
 
-  useEffect(()=>{
-    console.log({activeUsers});
-    
-  }, [activeUsers])
-
   const handleChatAllUsers = () => {
     if (!userName) {
       setShowNameBox(true);
     } else {
-      navigate.push('/chat/username');
+      navigate.push('/chat-all');
     }
   };
 
@@ -58,18 +53,18 @@ const Homepage = () => {
                 onChange={setName}
                 className='border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500 text-black'
               />
-              <button 
+              <button
                 onClick={async () => {
                   if (isExistingUser) {
                     await updateUserName(userName);
                   } else {
                     await nameBoxHandler();
                   }
-                  
+
                   if (!error) {
                     setName('');
                   }
-                }} 
+                }}
                 className='bg-purple-600 px-4 py-2 rounded-lg text-white hover:bg-purple-700'
               >
                 {isExistingUser ? 'Change username' : 'Set username'}
@@ -79,11 +74,11 @@ const Homepage = () => {
             {error && <p className='text-red-500 mt-2'>{error}</p>}
           </div>
         )}
-        
+
         <section className='bg-white mt-20 text-black p-4 rounded-lg'>
           <div className='flex justify-between'>
             <h2 className='text-xl font-semibold mb-4'>Active Users</h2>
-            <button 
+            <button
               onClick={handleChatAllUsers}
               className='bg-purple-600 px-4 py-2 rounded-lg text-white hover:bg-purple-700'
             >
@@ -91,31 +86,31 @@ const Homepage = () => {
             </button>
           </div>
           <div className='mt-4'>
-            {fetching?
-              (<div className="loader mx-auto ease-linear rounded-full border-4 border-t-4 h-12 w-12" />):
+            {fetching ?
+              (<div className="loader mx-auto ease-linear rounded-full border-4 border-t-4 h-12 w-12" />) :
               <div>
-                {activeUsers.length? (
-                     activeUsers.map((username: string) => (
-                       <div key={username} className='flex justify-between items-center p-2 border-b border-gray-300'>
-                         <span>{username}</span>
-                         <button 
-                           onClick={() => handleDirectMessage(username)}
-                           className='bg-purple-600 px-3 py-1 rounded-lg text-white hover:bg-purple-700'
-                         >
-                           Chat 
-                         </button>
-                       </div>
-                     ))
-                   ) : (
-                     <p className='text-center font-extrabold text-[28px] p-10'>No active users found.</p>
-                   )}
+                {activeUsers.length ? (
+                  activeUsers.map((username: string) => (
+                    <div key={username} className='flex justify-between items-center p-2 border-b border-gray-300'>
+                      <span>{username}</span>
+                      <button
+                        onClick={() => handleDirectMessage(username)}
+                        className='bg-purple-600 px-3 py-1 rounded-lg text-white hover:bg-purple-700'
+                      >
+                        Chat
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className='text-center font-extrabold text-[28px] p-10'>No active users found.</p>
+                )}
               </div>
-            
+
             }
 
           </div>
         </section>
-      </div> 
+      </div>
     </section>
   );
 };
