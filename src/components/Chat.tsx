@@ -1,5 +1,5 @@
 "use client"
-import { useChat } from '@/context/ChatContext';
+import { useChat } from '@/hooks/ChatContext';
 import React from 'react';
 
 const Chat: React.FC = () => {

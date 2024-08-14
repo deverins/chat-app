@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useHomepage } from '@/context/HomepageContext';
+import { useHomepage } from '@/hooks/HomepageContext';
 
 const Homepage = () => {
   const navigate = useRouter();
