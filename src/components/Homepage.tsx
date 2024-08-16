@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { isErrorMessage } from '@/utils/errorUtils';
 
 const Homepage = () => {
   const [userName, setUserName] = useState('');
@@ -11,8 +12,8 @@ const Homepage = () => {
   const [message, setMessage] = useState('');
   const [fetching, setFetching] = useState(false);
   const router = useRouter();
-  const isError = /user name is required|user already exists|username is required|user does not exist|both old and new usernames are required|user not found|the username has already been used|failed to create user|failed to fetch user information|an unexpected error occurred while updating your username/i.test(message);
 
+  // Check if the user is an existing user
   useEffect(() => {
     const storedUserName = localStorage.getItem('username');
     if (storedUserName) {
@@ -145,7 +146,7 @@ const Homepage = () => {
                 {isExistingUser ? 'Change username' : 'Set username'}
               </button>
             </div>
-            {message && <p className={`mt-2 ${isError ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
+            {message && <p className={`mt-2 ${isErrorMessage(message) ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
           </div>
         )}
 

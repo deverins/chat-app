@@ -59,7 +59,7 @@ export async function PUT(req: Request) {
     console.log('Received oldUserName:', oldUserName, 'newUserName:', newUserName);
 
     if (!oldUserName || !newUserName) {
-      return NextResponse.json({ error: 'Both old and new usernames are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Both old and new usernames are required. try to refresh' }, { status: 400 });
     }
 
     const { User } = Models;
