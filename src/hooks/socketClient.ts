@@ -39,12 +39,10 @@ export const usePMSocket = () => {
 };
 
 export const useRoomSocket = () => {
-
   const [messages, setMessages] = useState<IMessage[]>([]);
 
-
   const sendMessage = (message: string) => {
-    socket.emit("PUBLIC_ROOM", { message, from: localStorage.userName  });
+    socket.emit("PUBLIC_ROOM", { message, from: localStorage.userName });
   };
 
   useEffect(() => {

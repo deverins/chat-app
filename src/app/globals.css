@@ -8,13 +8,13 @@
   }
 
   input {
-    @apply border text-black border-neutral-500 rounded-lg p-2
+    @apply border text-black border-neutral-500 rounded-lg p-2;
   }
   .loader {
     border-top-color: purple;
     animation: spin 1s linear infinite;
   }
-  
+
   @keyframes spin {
     0% {
       transform: rotate(0deg);
@@ -24,4 +24,3 @@
     }
   }
 }
-

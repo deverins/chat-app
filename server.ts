@@ -18,11 +18,11 @@ type MessagePayload = {
 };
 
 type IMessage = {
-  senderName: string,
-  receiver?: string,
-  type: "public" | "private",
-  message: string
-}
+  senderName: string;
+  receiver?: string;
+  type: "public" | "private";
+  message: string;
+};
 
 const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
@@ -45,30 +45,34 @@ nextApp.prepare().then(async () => {
     console.log("New client connected");
 
     socket.on(PUBLIC_ROOM, async ({ message, from }: MessagePayload) => {
-
-      await saveMessage({ message, senderName: from, type: 'public' })
-      socket.broadcast.emit(PUBLIC_ROOM, { message, from, type: 'message' });
+      await saveMessage({ message, senderName: from, type: "public" });
+      socket.broadcast.emit(PUBLIC_ROOM, { message, from, type: "message" });
     });
 
     socket.on("subscribe", (username: string) => {
       users.set(username, socket.id);
       socket.username = username;
       setStatus(username, "active");
-      socket.broadcast.emit(PUBLIC_ROOM, { message: username, type: 'new' });
+      socket.broadcast.emit(PUBLIC_ROOM, { message: username, type: "new" });
     });
 
     // Listen for private messages
     socket.on("privateMessage", async ({ to, message }) => {
       const recipientSocketId = users.get(to);
       if (recipientSocketId) {
-        const senderName = socket.username as string
+        const senderName = socket.username as string;
         io.to(recipientSocketId).emit("privateMessage", {
           senderName,
           message,
           time: new Date(),
         });
         // save message
-        await saveMessage({ message, senderName, receiver: to, type: 'private' })
+        await saveMessage({
+          message,
+          senderName,
+          receiver: to,
+          type: "private",
+        });
       }
     });
 
@@ -79,7 +83,7 @@ nextApp.prepare().then(async () => {
       if (username) {
         users.delete(username);
         delete socket.username;
-        await setStatus(username, 'inactive');
+        await setStatus(username, "inactive");
       }
     });
   });
@@ -103,22 +107,20 @@ async function saveMessage({
   senderName,
   receiver,
   type,
-  message
+  message,
 }: IMessage): Promise<boolean> {
   try {
     const _sender = await User.findOne({ username: senderName });
     if (!_sender) return false;
     const sender = _sender._id;
     await Message.create({ sender, receiver, type, message });
-    console.log(await Message.create({ sender, receiver, type, message }))
+    console.log(await Message.create({ sender, receiver, type, message }));
     return true;
   } catch (error) {
     console.log(error);
     return false;
   }
-
 }
-
 
 /**
  * 

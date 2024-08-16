@@ -4,19 +4,19 @@ import { usePMSocket } from '@/hooks/socketClient';
 
 const Chat: React.FC = () => {
 
-  const {messages, sendMessage, socket} = usePMSocket()
+  const { messages, sendMessage, socket } = usePMSocket()
   const inputRef = useRef<HTMLInputElement | null>(null);
 
 
   const processMessage = () => {
     const message = inputRef?.current?.value || "";
-    if(!message.trim()) return;
+    if (!message.trim()) return;
     console.log(message)
     sendMessage(message)
     if (inputRef?.current) {
       inputRef.current.value = '';
     }
-    }
+  }
 
   return (
     <section className="h-[100dvh] w-full bg-black text-white relative">

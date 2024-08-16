@@ -5,19 +5,19 @@ import { useRoomSocket } from '@/hooks/socketClient';
 
 const Chat: React.FC = () => {
 
-  const {messages, sendMessage, socket} = useRoomSocket()
+  const { messages, sendMessage, socket } = useRoomSocket()
   const inputRef = useRef<HTMLInputElement | null>(null);
 
 
   const processMessage = () => {
     const message = inputRef?.current?.value || "";
-    if(!message.trim()) return;
+    if (!message.trim()) return;
 
     sendMessage(message)
     if (inputRef?.current) {
       inputRef.current.value = '';
     }
-    }
+  }
 
   return (
     <section className="h-[100dvh] w-full bg-black text-white relative">

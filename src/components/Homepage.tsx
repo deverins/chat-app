@@ -13,7 +13,7 @@ const Homepage = () => {
   const [fetching, setFetching] = useState(false);
   const router = useRouter();
 
-  // Check if the user is an existing user
+
   useEffect(() => {
     const storedUserName = localStorage.getItem('username');
     if (storedUserName) {
@@ -64,12 +64,12 @@ const Homepage = () => {
         setMessage('');
         setUserName('');
         setNewUserName('');
-      }, 2000); 
+      }, 2000);
     } catch (error: any) {
       setMessage(error.response?.data?.error || 'Error setting username');
       setTimeout(() => {
         setMessage('');
-      }, 2000); 
+      }, 2000);
     }
   };
 
@@ -92,13 +92,13 @@ const Homepage = () => {
         setShowNameBox(true);
         setTimeout(() => {
           setMessage('');
-        }, 2000); 
+        }, 2000);
       }
     } catch (error: any) {
       setMessage(error.response.data.error || 'Error changing username');
       setTimeout(() => {
         setMessage('');
-      }, 2000); 
+      }, 2000);
     }
   };
 
@@ -114,7 +114,7 @@ const Homepage = () => {
         setMessage('Failed to fetch active users. Please try again later.');
         setTimeout(() => {
           setMessage('');
-        }, 2000); 
+        }, 2000);
       } finally {
         setFetching(false);
       }
