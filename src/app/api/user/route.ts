@@ -77,13 +77,6 @@ export async function PUT(req: Request) {
     const oldUserName = formData.get("oldUserName");
     const newUserName = formData.get("newUserName");
 
-    console.log(
-      "Received oldUserName:",
-      oldUserName,
-      "newUserName:",
-      newUserName
-    );
-
     if (!oldUserName || !newUserName) {
       return NextResponse.json(
         { error: "Both old and new usernames are required. try to refresh" },
@@ -94,7 +87,6 @@ export async function PUT(req: Request) {
     const { User } = Models;
     const users = await User.find({ username: oldUserName });
     if (users.length === 0) {
-      console.log("User not found.");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
     const userExists = await User.findOne({ username: newUserName });
