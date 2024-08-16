@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { isErrorMessage } from '@/utils/errorUtils';
+import Image from 'next/image';
 
 const Homepage = () => {
   const [userName, setUserName] = useState('');
@@ -177,7 +178,15 @@ const Homepage = () => {
                     </div>
                   ))
                 ) : (
-                  <p className='text-center font-extrabold text-[28px] p-10'>No active users found.</p>
+                  <div className='flex justify-center items-center p-2 w-auto h-auto'>
+                    <Image
+                      src="/use-not-foud1.gif"
+                      alt="No active users found"
+                      width={500}
+                      height={300}
+                      priority
+                    />
+                  </div>
                 )}
               </div>
             }
