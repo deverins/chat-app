@@ -2,7 +2,6 @@
 import Homepage from '@/components/Homepage';
 import LoadingSpinner from '@/components/LoadingSpinner';
 import React, { useEffect, useState } from 'react';
-import { HomepageProvider } from '../hooks/HomepageContext';
 
 function Home() {
   const [isClient, setIsClient] = useState(false);
@@ -14,12 +13,7 @@ function Home() {
   if (!isClient) {
     return <LoadingSpinner />;
   }
-  return (
-    <HomepageProvider>
-      {/* <Chat /> */}
-      <Homepage/>
-    </HomepageProvider>
-  );
+  return (<Homepage />);
 }
 
 export default Home;

@@ -1,4 +1,5 @@
 // model/user.model.ts
+import { timeStamp } from 'console';
 import mongoose, { Schema, Document } from 'mongoose';
 
 interface IUser extends Document {
@@ -11,7 +12,8 @@ interface IMessage extends Document {
   receiver?: string,
   type: "public" | "private",
   status: "seen" | 'unseen',
-  message: string
+  message: string,
+  from?: string;
 }
 
 const userSchema: Schema = new Schema({
@@ -27,6 +29,7 @@ const messageSchema: Schema = new Schema({
   type: {type: String, emum: ['public', 'private'], required:true},
   status: { type: String, enum: ['seen', 'unseen'], default: 'unseen' },
   message: { type: Schema.Types.ObjectId, ref: "User" },
+  timeStamp: { type: Date, default: Date.now }
 });
 
 const Message = mongoose.models.Message ||  mongoose.model<IMessage>('Message', messageSchema);

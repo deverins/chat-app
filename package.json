@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "nodemon --watch src --exec \"ts-node\" server.ts",
-    "build": "next build",
-    "start": "next start",
+    "build": "next build && tsc",
+    "start": "cross-env NODE_ENV=production node build/server.js",
     "lint": "next lint"
   },
   "dependencies": {
@@ -27,6 +27,7 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@types/socket.io": "^3.0.1",
+    "cross-env": "^7.0.3",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",

@@ -1,32 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { useHomepage } from '@/hooks/HomepageContext';
 
 const Homepage = () => {
-  const navigate = useRouter();
-  const {
-    userName,
-    setName,
-    nameBoxHandler,
-    showNameBox,
-    setShowNameBox,
-    error,
-    activeUsers,
-    setActiveUsers,
-    isExistingUser,
-    fetching,
-    updateUserName,
-  } = useHomepage();
+  const [userName, setUserName] = useState('');
+  const [newUserName, setNewUserName] = useState('');
+  const [showNameBox, setShowNameBox] = useState(true);
+  const [activeUsers, setActiveUsers] = useState<string[]>([]);
+  const [isExistingUser, setIsExistingUser] = useState(false);
+  const [message, setMessage] = useState('');
+  const [fetching, setFetching] = useState(false);
+  const router = useRouter();
+  const isError = /user name is required|user already exists|username is required|user does not exist|both old and new usernames are required|user not found|the username has already been used|failed to create user|failed to fetch user information|an unexpected error occurred while updating your username/i.test(message);
 
   useEffect(() => {
+    const storedUserName = localStorage.getItem('username');
+    if (storedUserName) {
+      setUserName(storedUserName);
+      setIsExistingUser(true);
+    } else {
+      setIsExistingUser(false);
+    }
     setShowNameBox(true);
-  }, [setShowNameBox]);
+  }, []);
 
   const handleChatAllUsers = () => {
     if (!userName) {
       setShowNameBox(true);
     } else {
-      navigate.push('/chat/PUBLIC_ROOM');
+      router.push('/chat/PUBLIC_ROOM');
     }
   };
 
@@ -34,9 +36,91 @@ const Homepage = () => {
     if (!userName) {
       setShowNameBox(true);
     } else {
-      navigate.push(`/chat/${username}`);
+      router.push(`/chat/${username}`);
     }
   };
+
+  const setUsername = async () => {
+    try {
+      if (isExistingUser) {
+        // Update the username for an existing user
+        await updateUserName(newUserName);
+      } else {
+        // Set the username for a new user
+        const formData = new FormData();
+        formData.set("username", userName);
+        const response = await axios.post('/api/user', formData, {
+          headers: { 'content-type': 'multipart/form-data' },
+        });
+
+        if (response.status === 201) {
+          setMessage('Username set successfully!');
+          localStorage.setItem('username', userName);
+        }
+      }
+
+      setTimeout(() => {
+        setMessage('');
+        setUserName('');
+        setNewUserName('');
+      }, 2000); 
+    } catch (error: any) {
+      setMessage(error.response?.data?.error || 'Error setting username');
+      setTimeout(() => {
+        setMessage('');
+      }, 2000); 
+    }
+  };
+
+  const updateUserName = async (newUserName: string) => {
+    try {
+      const formData = new FormData();
+      formData.append('oldUserName', userName);
+      formData.append('newUserName', newUserName);
+
+      const response = await axios.put('/api/user', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.status === 200) {
+        setUserName(newUserName);
+        setMessage('Username updated successfully!');
+        localStorage.setItem('username', newUserName);
+        setShowNameBox(true);
+        setTimeout(() => {
+          setMessage('');
+        }, 2000); 
+      }
+    } catch (error: any) {
+      setMessage(error.response.data.error || 'Error changing username');
+      setTimeout(() => {
+        setMessage('');
+      }, 2000); 
+    }
+  };
+
+  useEffect(() => {
+    const fetchActiveUsers = async () => {
+      try {
+        setFetching(true);
+        const response = await axios.get('/api/active-user');
+        if (response.status === 200) {
+          setActiveUsers(response.data.activeUsers.map((user: any) => user.username as string));
+        }
+      } catch (error: any) {
+        setMessage('Failed to fetch active users. Please try again later.');
+        setTimeout(() => {
+          setMessage('');
+        }, 2000); 
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchActiveUsers();
+  }, []);
 
   return (
     <section className='h-[100dvh] w-full bg-black text-white'>
@@ -44,35 +128,24 @@ const Homepage = () => {
         {showNameBox && (
           <div className='p-4 flex flex-col gap-4 items-center'>
             <label htmlFor="username" className='text-lg font-semibold'>
-              {isExistingUser ? "Change your username" : "You're required to set your username"}
+              {isExistingUser ? "Change your username" : "Set your username"}
             </label>
             <div className='flex gap-2'>
               <input
                 type="text"
-                placeholder="Set your username"
-                value={userName}
-                onChange={setName}
+                placeholder={isExistingUser ? "Enter new username" : "Set your username"}
+                value={isExistingUser ? newUserName : userName}
+                onChange={(e) => isExistingUser ? setNewUserName(e.target.value) : setUserName(e.target.value)}
                 className='border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500 text-black'
               />
               <button
-                onClick={async () => {
-                  if (isExistingUser) {
-                    await updateUserName(userName);
-                  } else {
-                    await nameBoxHandler();
-                  }
-
-                  if (!error) {
-                    setName('');
-                  }
-                }}
+                onClick={setUsername}
                 className='bg-purple-600 px-4 py-2 rounded-lg text-white hover:bg-purple-700'
               >
                 {isExistingUser ? 'Change username' : 'Set username'}
               </button>
             </div>
-
-            {error && <p className='text-red-500 mt-2'>{error}</p>}
+            {message && <p className={`mt-2 ${isError ? 'text-red-500' : 'text-green-500'}`}>{message}</p>}
           </div>
         )}
 
@@ -106,9 +179,7 @@ const Homepage = () => {
                   <p className='text-center font-extrabold text-[28px] p-10'>No active users found.</p>
                 )}
               </div>
-
             }
-
           </div>
         </section>
       </div>

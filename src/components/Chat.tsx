@@ -11,7 +11,7 @@ const Chat: React.FC = () => {
   const processMessage = () => {
     const message = inputRef?.current?.value || "";
     if(!message.trim()) return;
-
+    console.log(message)
     sendMessage(message)
     if (inputRef?.current) {
       inputRef.current.value = '';

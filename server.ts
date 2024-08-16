@@ -46,19 +46,19 @@ nextApp.prepare().then(async () => {
 
     socket.on(PUBLIC_ROOM, async ({ message, from }: MessagePayload) => {
 
-      await saveMessage({message, senderName:from, type:'public'})
-      socket.broadcast.emit(PUBLIC_ROOM, { message, from, type:'message' });
+      await saveMessage({ message, senderName: from, type: 'public' })
+      socket.broadcast.emit(PUBLIC_ROOM, { message, from, type: 'message' });
     });
 
     socket.on("subscribe", (username: string) => {
       users.set(username, socket.id);
-      socket.username = username; 
+      socket.username = username;
       setStatus(username, "active");
-      socket.broadcast.emit(PUBLIC_ROOM, { message:username, type:'new' });
+      socket.broadcast.emit(PUBLIC_ROOM, { message: username, type: 'new' });
     });
 
     // Listen for private messages
-    socket.on("privateMessage", async({ to, message }) => {
+    socket.on("privateMessage", async ({ to, message }) => {
       const recipientSocketId = users.get(to);
       if (recipientSocketId) {
         const senderName = socket.username as string
@@ -68,23 +68,19 @@ nextApp.prepare().then(async () => {
           time: new Date(),
         });
         // save message
-        await saveMessage({message, senderName, receiver:to, type:'private'})
+        await saveMessage({ message, senderName, receiver: to, type: 'private' })
       }
     });
 
     // Handle disconnection
-    socket.on("disconnect", async() => {
+    socket.on("disconnect", async () => {
       console.log("User disconnected");
       const username = socket.username;
       if (username) {
-        users.delete(username); 
+        users.delete(username);
         delete socket.username;
         await setStatus(username, 'inactive');
       }
-    });
-
-    socket.on("disconnect", async () => {
-      console.log("Client disconnected");
     });
   });
 
@@ -110,16 +106,17 @@ async function saveMessage({
   message
 }: IMessage): Promise<boolean> {
   try {
-    const _sender = await User.findOne({username: senderName});
-    if(!_sender) return false;
+    const _sender = await User.findOne({ username: senderName });
+    if (!_sender) return false;
     const sender = _sender._id;
-    await Message.create({sender,receiver,type,message})
+    await Message.create({ sender, receiver, type, message });
+    console.log(await Message.create({ sender, receiver, type, message }))
     return true;
   } catch (error) {
-    console.log(error);    
+    console.log(error);
     return false;
   }
-  
+
 }
 
 
