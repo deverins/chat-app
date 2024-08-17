@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nodemon --watch src --exec \"ts-node\" server.ts",
     "build": "next build && tsc",
-    "start": "cross-env NODE_ENV=production node build/server.js",
+    "start": "node build/server.js",
     "lint": "next lint"
   },
   "dependencies": {
