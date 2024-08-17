@@ -2,21 +2,41 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 
-let socket: Socket;
-
 export type IMessage = {
   senderName: string;
   message: string;
-  time: Date;
+  time: string;
 };
 
-export const usePMSocket = () => {
-  const { receiver } = useParams();
+let socket: Socket;
 
+export const useChatSocket = () => {
+  const { receiver } = useParams();
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   const sendMessage = (message: string) => {
-    socket.emit("privateMessage", { message, to: receiver });
+    const senderName = localStorage.getItem("username") || "Anonymous";
+
+    if (receiver) {
+      // Send private message
+      socket.emit("privateMessage", {
+        message,
+        to: receiver,
+        senderName,
+        time: new Date().toISOString(),
+      });
+    } else {
+      // Send public message
+      socket.emit("PUBLIC_ROOM", {
+        message,
+        from: senderName,
+        time: new Date().toISOString(),
+      });
+    }
+  };
+
+  const addMessage = (message: IMessage) => {
+    setMessages((prevMessages) => [...prevMessages, message]);
   };
 
   useEffect(() => {
@@ -24,42 +44,37 @@ export const usePMSocket = () => {
 
     socket.on("connect", () => {
       console.log("Connected to server");
+
+      const username = localStorage.getItem("username");
+      if (username) {
+        socket.emit("subscribe", username);
+      }
     });
 
-    socket.on("privateMessage", (response: IMessage) => {
-      setMessages((prev) => prev.concat(response));
-    });
+    if (receiver) {
+      // Private chat
+      socket.on("privateMessage", (response: IMessage) => {
+        const formattedMessage = {
+          ...response,
+          time: new Date(response.time).toLocaleString(),
+        };
+        addMessage(formattedMessage);
+      });
+    } else {
+      // Public chat
+      socket.on("PUBLIC_ROOM", (response: IMessage) => {
+        const formattedMessage = {
+          ...response,
+          time: new Date(response.time).toLocaleString(),
+        };
+        addMessage(formattedMessage);
+      });
+    }
 
     return () => {
       socket.disconnect();
     };
   }, [receiver]);
 
-  return { messages, sendMessage, socket };
-};
-
-export const useRoomSocket = () => {
-  const [messages, setMessages] = useState<IMessage[]>([]);
-
-  const sendMessage = (message: string) => {
-    socket.emit("PUBLIC_ROOM", { message, from: localStorage.userName });
-  };
-
-  useEffect(() => {
-    socket = io();
-
-    socket.on("connect", () => {
-      console.log("Connected to server");
-    });
-
-    socket.on("PUBLIC_ROOM", (response: IMessage) => {
-      setMessages((prev) => prev.concat(response));
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  return { messages, sendMessage, socket };
+  return { messages, sendMessage, addMessage, socket };
 };

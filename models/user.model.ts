@@ -1,5 +1,4 @@
-// model/user.model.ts
-import { timeStamp } from 'console';
+// models/user.model.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
 interface IUser extends Document {
@@ -8,12 +7,12 @@ interface IUser extends Document {
 }
 
 interface IMessage extends Document {
-  sender: string,
-  receiver?: string,
-  type: "public" | "private",
-  status: "seen" | 'unseen',
-  message: string,
-  from?: string;
+  sender: Schema.Types.ObjectId;
+  receiver?: Schema.Types.ObjectId;
+  type: "public" | "private";
+  status: "seen" | 'unseen';
+  message: string;
+  timestamp: Date;
 }
 
 const userSchema: Schema = new Schema({
@@ -24,15 +23,14 @@ const userSchema: Schema = new Schema({
 const User = mongoose.models.User ||  mongoose.model<IUser>('User', userSchema);
 
 const messageSchema: Schema = new Schema({
-  sender:  { type: Schema.Types.ObjectId, ref: "User", required:true },
-  receiver:  { type: Schema.Types.ObjectId, ref: "User" },
-  type: {type: String, emum: ['public', 'private'], required:true},
+  sender: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  receiver: { type: Schema.Types.ObjectId, ref: "User" },
+  type: { type: String, enum: ['public', 'private'], required: true },
   status: { type: String, enum: ['seen', 'unseen'], default: 'unseen' },
-  message: { type: Schema.Types.ObjectId, ref: "User" },
-  timeStamp: { type: Date, default: Date.now }
+  message: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
 });
 
 const Message = mongoose.models.Message ||  mongoose.model<IMessage>('Message', messageSchema);
 
-
-export default { User, Message, mongoose};
+export default { User, Message, mongoose };

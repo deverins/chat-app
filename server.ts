@@ -5,6 +5,7 @@ import Models from "./models/user.model";
 import { Server, Socket } from "socket.io";
 import "dotenv/config";
 import connectDB from "./src/lib/mongodbConnection";
+import { Schema } from "mongoose";
 
 declare module "socket.io" {
   interface Socket {
@@ -28,6 +29,7 @@ const dev = process.env.NODE_ENV !== "production";
 const nextApp = next({ dev });
 const handle = nextApp.getRequestHandler();
 const { User, Message } = Models;
+
 nextApp.prepare().then(async () => {
   const server = express();
   const httpServer = createServer(server);
@@ -35,28 +37,44 @@ nextApp.prepare().then(async () => {
 
   server.use(express.json());
 
-  let PUBLIC_ROOM = "PUBLIC_ROOM";
+  const PUBLIC_ROOM = "PUBLIC_ROOM";
 
   await connectDB();
 
   const users = new Map();
-
   io.on("connection", (socket: Socket) => {
     console.log("New client connected");
 
-    socket.on(PUBLIC_ROOM, async ({ message, from }: MessagePayload) => {
-      await saveMessage({ message, senderName: from, type: "public" });
-      socket.broadcast.emit(PUBLIC_ROOM, { message, from, type: "message" });
-    });
-
-    socket.on("subscribe", (username: string) => {
+    socket.on("subscribe", async (username: string) => {
       users.set(username, socket.id);
       socket.username = username;
-      setStatus(username, "active");
-      socket.broadcast.emit(PUBLIC_ROOM, { message: username, type: "new" });
+      await setStatus(username, "active");
+      socket.join(PUBLIC_ROOM);
+      socket.broadcast.to(PUBLIC_ROOM).emit(PUBLIC_ROOM, {
+        message: `${username} has joined.`,
+        from: "System",
+        time: new Date().toISOString(),
+        type: "public",
+      });
     });
 
-    // Listen for private messages
+    socket.on(PUBLIC_ROOM, async ({ message, from }: MessagePayload) => {
+      const formattedMessage = {
+        message,
+        from,
+        type: "public",
+        time: new Date().toISOString(),
+      };
+
+      await saveMessage({
+        message,
+        senderName: from,
+        type: "public",
+      });
+
+      io.to(PUBLIC_ROOM).emit(PUBLIC_ROOM, formattedMessage);
+    });
+
     socket.on("privateMessage", async ({ to, message }) => {
       const recipientSocketId = users.get(to);
       if (recipientSocketId) {
@@ -64,9 +82,9 @@ nextApp.prepare().then(async () => {
         io.to(recipientSocketId).emit("privateMessage", {
           senderName,
           message,
-          time: new Date(),
+          time: new Date().toISOString(),
         });
-        // save message
+
         await saveMessage({
           message,
           senderName,
@@ -76,13 +94,11 @@ nextApp.prepare().then(async () => {
       }
     });
 
-    // Handle disconnection
     socket.on("disconnect", async () => {
       console.log("User disconnected");
       const username = socket.username;
       if (username) {
         users.delete(username);
-        delete socket.username;
         await setStatus(username, "inactive");
       }
     });
@@ -98,9 +114,10 @@ nextApp.prepare().then(async () => {
 
 async function setStatus(username: string, status: "active" | "inactive") {
   const user = await User.findOne({ username });
-  if (!user) return;
-  user.status = status;
-  await user.save();
+  if (user) {
+    user.status = status;
+    await user.save();
+  }
 }
 
 async function saveMessage({
@@ -111,13 +128,35 @@ async function saveMessage({
 }: IMessage): Promise<boolean> {
   try {
     const _sender = await User.findOne({ username: senderName });
-    if (!_sender) return false;
+    if (!_sender) {
+      console.error(`Sender not found: ${senderName}`);
+      return false;
+    }
     const sender = _sender._id;
-    await Message.create({ sender, receiver, type, message });
-    console.log(await Message.create({ sender, receiver, type, message }));
+
+    let receiverId: Schema.Types.ObjectId | null = null;
+    if (type === "private" && receiver) {
+      const _receiver = await User.findOne({ username: receiver });
+      if (_receiver) {
+        receiverId = _receiver._id;
+      } else {
+        console.error(`Recipient not found for username: ${receiver}`);
+        return false;
+      }
+    }
+
+    await Message.create({
+      sender,
+      receiver: receiverId,
+      type,
+      status: "unseen",
+      message,
+      timestamp: new Date(),
+    });
+
     return true;
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    console.error(`Failed to save message: ${error.message}`);
     return false;
   }
 }
