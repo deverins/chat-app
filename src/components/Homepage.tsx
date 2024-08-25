@@ -125,7 +125,7 @@ const Homepage = () => {
   }, []);
 
   return (
-    <section className='h-[100dvh] w-full bg-black text-white'>
+    <section className='h-[100dvh] min-w-[100dvh] w-full bg-black text-white'>
       <div className="container mx-auto p-4">
         {showNameBox && (
           <div className='p-4 flex flex-col gap-4 items-center'>
