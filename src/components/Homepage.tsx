@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { isErrorMessage } from '@/utils/errorUtils';
+import activeUserNotFound from '/public/use-not-found1.png'
 import Image from 'next/image';
 
 const Homepage = () => {
@@ -178,14 +179,17 @@ const Homepage = () => {
                     </div>
                   ))
                 ) : (
-                  <div className='flex justify-center items-center p-2 w-auto h-auto'>
+                  <div className='flex justify-center items-center p-2 gap-3 w-auto h-auto flex-col md:flex-row'>
                     <Image
-                      src="/use-not-foud1.gif"
+                      src={activeUserNotFound}
                       alt="No active users found"
-                      width={500}
+                      width={200}
                       height={300}
                       priority
                     />
+                    <div>
+                      <h1 className=' text-lg lg:text-2xl md:text-2xl font-bold sm:text-lg '>No active user found</h1>
+                    </div>
                   </div>
                 )}
               </div>
