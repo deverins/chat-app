@@ -1,6 +1,6 @@
 "use client";
+import { ioClientHook } from "@/hooks/ioClient";
 import React, { useRef, useEffect, useState } from "react";
-import { useChatSocket } from "@/hooks/socketClient";
 
 interface Message {
   senderName: string;
@@ -9,7 +9,7 @@ interface Message {
 }
 
 const PublicChat: React.FC = () => {
-  const { sendMessage, addMessage } = useChatSocket();
+  const { sendMessage, addMessage } = ioClientHook();
   const [messages, setMessages] = useState<Message[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -66,8 +66,8 @@ const PublicChat: React.FC = () => {
             >
               <div
                 className={`relative max-w-full md:max-w-[65%] lg:max-w-[75%] p-3 rounded-lg ${isSender
-                    ? "bg-purple-500 text-white rounded-br-none"
-                    : "bg-neutral-700 text-white rounded-bl-none"
+                  ? "bg-purple-500 text-white rounded-br-none"
+                  : "bg-neutral-700 text-white rounded-bl-none"
                   }`}
               >
                 <div className="font-bold mb-1">{m.senderName}</div>
@@ -77,8 +77,8 @@ const PublicChat: React.FC = () => {
                 </div>
                 <div
                   className={`absolute w-3 h-3 top-2 ${isSender
-                      ? "bg-purple-500 right-[-6px] transform rotate-45"
-                      : "bg-neutral-700 left-[-6px] transform rotate-45"
+                    ? "bg-purple-500 right-[-6px] transform rotate-45"
+                    : "bg-neutral-700 left-[-6px] transform rotate-45"
                     }`}
                 />
               </div>

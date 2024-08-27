@@ -5,7 +5,7 @@ import PublicChat from '@/components/PublicChat';
 import { useParams } from 'next/navigation';
 
 const ChatPage = () => {
-  const { receiver } = useParams();
+  const { receiver } = useParams()as { receiver: string };
 
   return (
     <>

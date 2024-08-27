@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { isErrorMessage } from '@/utils/errorUtils';
-import activeUserNotFound from '/public/use-not-found1.png'
+import activeUserNotFound from '/public/use-not-found1.png';
 import Image from 'next/image';
 
 const Homepage = () => {
@@ -14,7 +14,6 @@ const Homepage = () => {
   const [message, setMessage] = useState('');
   const [fetching, setFetching] = useState(false);
   const router = useRouter();
-
 
   useEffect(() => {
     const storedUserName = localStorage.getItem('username');
@@ -46,10 +45,8 @@ const Homepage = () => {
   const setUsername = async () => {
     try {
       if (isExistingUser) {
-        // Update the username for an existing user
         await updateUserName(newUserName);
       } else {
-        // Set the username for a new user
         const formData = new FormData();
         formData.set("username", userName);
         const response = await axios.post('/api/user', formData, {
@@ -125,18 +122,19 @@ const Homepage = () => {
     fetchActiveUsers();
   }, []);
 
+
   return (
     <section className='h-[100dvh] min-w-[100dvh] w-full bg-black text-white'>
       <div className="container mx-auto p-4">
         {showNameBox && (
           <div className='p-4 flex flex-col gap-4 items-center'>
             <label htmlFor="username" className='text-lg font-semibold'>
-              {isExistingUser ? "Change your username" : "Set your username"}
+              {isExistingUser ? `${userName}` : "Set your username"}
             </label>
             <div className='flex gap-2'>
               <input
                 type="text"
-                placeholder={isExistingUser ? "Enter new username" : "Set your username"}
+                placeholder={isExistingUser ? `${userName} enter new username` : "Set your username"}
                 value={isExistingUser ? newUserName : userName}
                 onChange={(e) => isExistingUser ? setNewUserName(e.target.value) : setUserName(e.target.value)}
                 className='border-2 border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-purple-500 text-black'
@@ -152,7 +150,7 @@ const Homepage = () => {
           </div>
         )}
 
-        <section className='bg-white mt-20 text-black p-4 rounded-lg'>
+        <section className='bg-neutral-300 mt-20 text-black p-4 rounded-lg'>
           <div className='flex justify-between'>
             <h2 className='text-xl font-semibold mb-4'>Active Users</h2>
             <button

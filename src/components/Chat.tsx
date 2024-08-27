@@ -1,6 +1,6 @@
 "use client";
+import { ioClientHook } from "@/hooks/ioClient";
 import React, { useRef, useEffect, useState } from "react";
-import { useChatSocket } from "@/hooks/socketClient";
 
 interface Message {
   senderName: string;
@@ -9,7 +9,7 @@ interface Message {
 }
 
 const Chat: React.FC = () => {
-  const { sendMessage, addMessage } = useChatSocket();
+  const { sendMessage, addMessage } = ioClientHook();
   const [messages, setMessages] = useState<Message[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 

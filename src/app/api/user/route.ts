@@ -1,8 +1,11 @@
 import { NextResponse, NextRequest } from "next/server";
-import Models from "@models/user.model";
+import Models from "@/lib/models/user.model";
+import connectDB from "@/lib/mongodbConnection";
 
 export async function POST(req: NextRequest) {
   try {
+    
+    await connectDB();
     const formData = await req.formData();
     const userName = formData.get("username");
 
@@ -38,6 +41,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: Request) {
   try {
+    await connectDB();
     const url = new URL(req.url);
     const username = url.searchParams.get("username");
 
@@ -76,6 +80,8 @@ export async function GET(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+    
+    await connectDB();
     const formData = await req.formData();
     const oldUserName = formData.get("oldUserName");
     const newUserName = formData.get("newUserName");

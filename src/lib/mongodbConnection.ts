@@ -1,4 +1,4 @@
-import Models from "./../../models/user.model";
+import Models from "./models/user.model";
 
 const connectDB = async () => {
   const { mongoose } = Models;

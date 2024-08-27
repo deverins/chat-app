@@ -5,7 +5,6 @@
       "dom.iterable",
       "esnext"
     ],
-    "outDir": "./build",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -28,7 +27,7 @@
         "./src/*"
       ],
       "@models/*": [
-        "./models/*"
+        "./src/lib/models/*"
       ],
     }
   },
